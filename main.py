@@ -3,7 +3,7 @@ import sys
 import numpy as np
 from keybinds import Keybinds
 from constants import WINDOW_WIDTH, WINDOW_HEIGHT, COLORS, CAPTION, dt
-from dynamic_systems import SimplePendulum, DoublePendulum
+from dynamic_systems import SimplePendulum, DoublePendulum, MultiPendulum
 from solvers import ExplicitEuler, RK4
 pygame.init()
 
@@ -31,14 +31,22 @@ simple_pendulum = SimplePendulum(
 )
 
 double_pendulum = DoublePendulum(
-    initial_state = np.array([0.1, 0.1, 0, 0]),
-    rod_lengths=[50,50],
+    initial_state = np.array([0, 0, 0, 0]),
+    rod_lengths=[100,50],
     masses=[1,1],
     position=[600,300],
     damping_coefficient=0.03125
 )
 
-current_system = double_pendulum
+multipendulum = MultiPendulum(
+    initial_state=np.array([-1.5, -1.5, -1.5, -1.5, 0, 0, 0, 0]),
+    rod_lengths=[100,50,25,12],
+    masses=[1,1,1,1],
+    position=[600,300],
+    damping_coefficient=0.03125
+)
+
+current_system = multipendulum
 
 solver = RK4()
 t = 0
