@@ -6,11 +6,12 @@ class ExplicitEuler():
         
         system.set_state(np.array([
             state[i] + dt*system.derivative_func(t, state)[i] for i in range(len(state))
-        ]))
+        ]), t)
 
 class ImplicitEuler():
     def step(self, system, t, dt):
         state = system.state
+        # TODO
 
 class RK4():
     def step(self, system, t, dt):
@@ -24,4 +25,4 @@ class RK4():
 
         system.set_state(np.array([
             state[i] + (1/6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) for i in range(len(state))
-        ]))
+        ]), t)

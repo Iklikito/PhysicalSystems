@@ -171,14 +171,14 @@ class MultiPendulum():
         for i in range(self.N):
             pygame.draw.circle(screen, COLORS["white"], self.pendulum_positions[i], 5)
 
-    def set_state(self, new_state):
+    def set_state(self, new_state, t):
         self.state = new_state
         self.update_pendulum_positions()
-        self.update_trackers()
+        self.update_trackers(t)
 
-    def update_trackers(self):
+    def update_trackers(self, t):
         for tracker in self.trackers:
-            tracker.update()
+            tracker.update(t)
 
     def attach_tracker(self, tracker):
         if tracker in self.trackers:

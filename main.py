@@ -2,7 +2,7 @@ import pygame
 import sys
 import numpy as np
 from keybinds import Keybinds
-from constants import WINDOW_WIDTH, WINDOW_HEIGHT, COLORS, CAPTION, dt
+from constants import WINDOW_WIDTH, WINDOW_HEIGHT, COLORS, CAPTION, dt, simulation_over_real_time_ratio, MAX_FPS
 from dynamic_systems import SimplePendulum, DoublePendulum, MultiPendulum
 from solvers import ExplicitEuler, RK4
 from trajectorytracker import TrajectoryTracker
@@ -52,18 +52,30 @@ def cmd_echo(args):
 @command("backgroundcolor")
 def cmd_bg(args):
     global background_color
-    if args[0] in COLORS:
-        return "Color not recognized."
+    if args[0] not in COLORS:
+        return "Color" + args[0] + " not recognized."
     background_color = COLORS[args[0]]
     return "Background color set to " + args[0] + "."
+
+@command("show")
+def cmd_show(args):
+    global dt, current_system
+    return {
+        "damping" : "Damping coefficient: " + str(float(current_system.damping_coefficient)),
+        "stepsize" : "Stepsize: " + str(dt)
+    }[args[0]]
 
 @command("damping")
 def cmd_set_damping(args):
     global current_system
     current_system.set_damping_coefficient(float(args[0]))
+    return "Damping coefficient set to " + str(float(args[0]))
 
-screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption(CAPTION)
+@command("stepsize")
+def cmd_set_stepsize(args):
+    global dt
+    dt = float(args[0])
+    return "Step size set to " + str(float(args[0]))
 
 simple_pendulum = SimplePendulum(
     initial_state=np.array([-1.8, 0]), 
@@ -88,8 +100,16 @@ multipendulum = MultiPendulum(
     damping_coefficient=0.03125*0
 )
 
+multipendulum = MultiPendulum(
+    initial_state=np.array([-1.5, 1.5, -1.5, 1.5, 0, 0, 0, 0]),
+    rod_lengths=[50,50,50,50],
+    masses=[1,1,1,1],
+    position=[600,300],
+    damping_coefficient=0.03125*0
+)
+
 multipendulum_trajectory_tracker = TrajectoryTracker(
-    max_trajectory_lengths=[200]*4,
+    max_trajectory_lengths=[1]*4,
     trajectory_colors=[COLORS["gray"]]*4,
     system=multipendulum,
     trajectory_thicknesses=[1,2,4,8]
@@ -102,6 +122,11 @@ solver = RK4()
 t = 0
 
 background_color = COLORS["black"]
+
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption(CAPTION)
+clock = pygame.time.Clock()
+accumulator = 0
 
 simulating = False
 show_trajectories = False
@@ -125,10 +150,15 @@ while running:
             else:
                 key_binds.get(event.key)
 
-    if simulating:
-        solver.step(current_system, t, dt)
+    frame_time = simulation_over_real_time_ratio * clock.tick(MAX_FPS) / 1000
 
-    t += dt
+    if simulating:
+        accumulator += frame_time
+
+        while accumulator >= dt:
+            solver.step(current_system, t, dt)
+            t += dt
+            accumulator -= dt
 
     screen.fill(background_color)
 

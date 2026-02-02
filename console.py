@@ -25,7 +25,7 @@ class Console():
     def add_log(self, output_text):
         self.log_lines.append(output_text)
         if len(self.log_lines) > self.max_log_lines:
-            self.max_log_lines.pop(0)
+            self.log_lines.pop(0)
 
     def run_command(self):
         if not self.input_text.strip():
