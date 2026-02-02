@@ -1,7 +1,7 @@
 import pygame
 
 class Keybinds:
-    def __init__(self, init_key_to_func):
+    def __init__(self, init_key_to_func={}):
         self.key_to_func = init_key_to_func
 
     def default_func(self, key):

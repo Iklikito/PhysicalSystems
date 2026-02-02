@@ -97,6 +97,7 @@ class MultiPendulum():
         self.N = len(rod_lengths)
         self.mass_sums = self.precompute_mass_sums()
         self.update_pendulum_positions()
+        self.trackers = []
 
     def precompute_mass_sums(self):
         mass_sums = []
@@ -146,9 +147,10 @@ class MultiPendulum():
             current_pendulum_position[1] += self.rod_lengths[i] * np.sin(self.state[i])
             self.pendulum_positions.append(current_pendulum_position.copy())
 
-    def draw(self, screen):
-        self.update_pendulum_positions()
+    def get_positions(self):
+        return self.pendulum_positions
 
+    def draw(self, screen):
         pygame.draw.line(
                 screen,
                 COLORS["white"],
@@ -171,3 +173,15 @@ class MultiPendulum():
 
     def set_state(self, new_state):
         self.state = new_state
+        self.update_pendulum_positions()
+        self.update_trackers()
+
+    def update_trackers(self):
+        for tracker in self.trackers:
+            tracker.update()
+
+    def attach_tracker(self, tracker):
+        if tracker in self.trackers:
+            return
+
+        self.trackers.append(tracker)
