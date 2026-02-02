@@ -185,3 +185,6 @@ class MultiPendulum():
             return
 
         self.trackers.append(tracker)
+
+    def set_damping_coefficient(self, damping_coefficient):
+        self.damping_coefficient = damping_coefficient

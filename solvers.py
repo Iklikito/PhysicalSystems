@@ -2,14 +2,21 @@ import numpy as np
 
 class ExplicitEuler():
     def step(self, system, t, dt):
+        state = system.state
+        
         system.set_state(np.array([
-            system.state[i] + dt*system.derivative_func(t, state)[i] for i in range(len(state))
+            state[i] + dt*system.derivative_func(t, state)[i] for i in range(len(state))
         ]))
+
+class ImplicitEuler():
+    def step(self, system, t, dt):
+        state = system.state
 
 class RK4():
     def step(self, system, t, dt):
-        f = system.derivative_func
         state = system.state
+        f = system.derivative_func
+        
         k1 = dt*f(t,        state       )
         k2 = dt*f(t + dt/2, state + k1/2)
         k3 = dt*f(t + dt/2, state + k2/2)
