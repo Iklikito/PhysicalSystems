@@ -5,7 +5,8 @@ from constants import COLORS
 
 class MultiPendulum():
     def __init__(self, initial_state, rod_lengths, masses, position, damping_coefficient=0.0):
-        self.state = initial_state
+        self.initial_state = initial_state
+        self.state = initial_state.copy()
         self.rod_lengths = rod_lengths
         self.masses = masses
         self.position = position
@@ -124,3 +125,6 @@ class MultiPendulum():
 
     def set_damping_coefficient(self, damping_coefficient):
         self.damping_coefficient = damping_coefficient
+
+    def get_initial_state(self):
+        return self.initial_state

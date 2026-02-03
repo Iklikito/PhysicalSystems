@@ -13,8 +13,8 @@ class Console():
         self.max_log_lines = max_log_lines
         self.commands = ConsoleCommands()
 
-    def set_command(self, command_name, func, description=""):
-        self.commands.set(command_name, func, description)
+    def set_command(self, command_name, func, parameter_types, description=""):
+        self.commands.set(command_name, func, parameter_types, description)
 
     def add_to_input_text(self, char):
         self.input_text += char
