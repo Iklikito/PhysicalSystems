@@ -45,9 +45,9 @@ def reset():
 
 console = Console()
 
-def command(command_name, parameter_types, description=""):
+def command(command_name, parameter_types=None, description=""):
     def decorator(func):
-        console.set_command(command_name, func, parameter_types, description)
+        console.set_command(command_name, func, [] if parameter_types is None else parameter_types, description)
         return func
     return decorator
 
@@ -63,7 +63,7 @@ def cmd_bg_color(args):
     background_color = COLORS[args[0]]
     return "Background color set to " + args[0] + "."
 
-@command(command_name="backgroundrgb", parameter_types=[ParameterType.INT]*3, description="Changes the backgroudn color to the given rgb value.")
+@command(command_name="backgroundrgb", parameter_types=[ParameterType.INT]*3, description="Changes the background color to the given rgb value.")
 def cmb_bg_rgb(args):
     global background_color
     for i in range(3):
@@ -90,13 +90,13 @@ def cmd_show(args):
 def cmd_set_damping(args):
     global current_system
     current_system.set_damping_coefficient(args[0])
-    return "Damping coefficient set to " + str(args[0])
+    return "Damping coefficient set to " + str(args[0]) + "."
 
 @command(command_name="stepsize", parameter_types=[ParameterType.FLOAT])
 def cmd_set_stepsize(args):
     global dt
     dt = args[0]
-    return "Step size set to " + str(args[0])
+    return "Step size set to " + str(args[0]) + "."
 
 @command(command_name="solver", parameter_types=[ParameterType.STRING])
 def cmd_set_solver(args):
@@ -106,20 +106,37 @@ def cmd_set_solver(args):
         "impliciteuler" : [ime_solver, "implicit euler"],
         "rk4"           : [rk4_solver, "RK-4"]
     }
+    if args[0] not in solver_name_to_output:
+        return "Solver \'" + args[0] + "\' not recognized."
     output = solver_name_to_output[args[0]]
     current_solver = output[0]
     return "Solver set to " + output[1] + "."
 
-@command(command_name="reset", parameter_types=[])
+@command(command_name="reset")
 def cmd_reset(args):
     global current_system, t
     current_system.set_state(current_system.get_initial_state(), t)
     return "System reset."
 
-@command(command_name="quit", parameter_types=[])
+@command(command_name="start")
+def cmd_toggle_simulation(args):
+    global simulating
+    simulating = True
+
+@command(command_name="pause")
+def cmd_pause(args):
+    global simulating
+    simulating = False
+
+@command(command_name="quit")
 def cmd_quit(args):
     global running
     running = False
+
+@command(command_name="clear")
+def cmd_clear(args):
+    global console
+    console.clear_logs()
 
 multipendulum = MultiPendulum(
     initial_state=np.array([-1.5, -1.5, -1.5, -1.5, 0, 0, 0, 0]),
@@ -130,7 +147,7 @@ multipendulum = MultiPendulum(
 )
 
 multipendulum_trajectory_tracker = TrajectoryTracker(
-    max_trajectory_lengths=[1]*4,
+    max_time_spans=[0,0,0,100],
     trajectory_colors=[COLORS["gray"]]*4,
     system=multipendulum,
     trajectory_thicknesses=[1,2,4,8]

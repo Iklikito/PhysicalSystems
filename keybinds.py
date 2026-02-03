@@ -1,8 +1,8 @@
 import pygame
 
 class Keybinds:
-    def __init__(self, init_key_to_func={}):
-        self.key_to_func = init_key_to_func
+    def __init__(self, init_key_to_func=None):
+        self.key_to_func = {} if init_key_to_func is None else init_key_to_func
 
     def default_func(self, key):
         print("No function found. Key pressed:", str(key))

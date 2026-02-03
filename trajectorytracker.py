@@ -2,21 +2,21 @@ import pygame
 from constants import COLORS
 
 class TrajectoryTracker():
-    def __init__(self, max_trajectory_lengths, trajectory_colors=[], system=None, trajectory_thicknesses=[]):
+    def __init__(self, max_time_spans, trajectory_colors=None, system=None, trajectory_thicknesses=None):
         self.system = None
-        self.attach_to_system(system)
-        self.N = len(max_trajectory_lengths)
+        if system != None: self.attach_to_system(system)
+        self.N = len(max_time_spans)
         self.trajectories = [[] for _ in range(self.N)]
-        self.max_time_spans = max_trajectory_lengths
-        self.trajectory_colors = trajectory_colors if trajectory_colors != [] else [COLORS["white"]]*self.N
-        self.trajectory_thicknesses = trajectory_thicknesses if trajectory_thicknesses != [] else [1]*self.N
+        self.max_time_spans = max_time_spans
+        self.trajectory_colors = [COLORS["white"]]*self.N if trajectory_colors is None else trajectory_colors
+        self.trajectory_thicknesses = [1]*self.N if trajectory_thicknesses is None else trajectory_thicknesses
 
     def attach_to_system(self, new_system):
         if self.system == new_system:
             return
         
         self.system = new_system
-        new_system.attach_tracker(self)
+        if new_system != None: new_system.attach_tracker(self)
 
     def update(self, t):
         new_positions = self.system.get_positions()

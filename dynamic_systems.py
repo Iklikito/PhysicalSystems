@@ -62,7 +62,7 @@ class MultiPendulum():
                 A[n][j] = self.mass_sums[max(j, n)] * self.rod_lengths[j] * self.rod_lengths[n] * np.cos(state[j] - state[n])
 
         for n in range(N):
-            b[n] = - g * self.mass_sums[n] * self.rod_lengths[n] * np.cos(state[n])
+            b[n] = g * self.mass_sums[n] * self.rod_lengths[n] * np.cos(state[n])
             for j in range(N):
                 if j == n:
                     continue

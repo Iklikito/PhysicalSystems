@@ -14,7 +14,7 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 600
 
 CAPTION = "Pendulum - Simulation"
 
-g = -9.8
+g = 9.8
 
 dt = 0.01
 

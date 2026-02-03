@@ -12,8 +12,8 @@ parameter_type_to_convert_func = {
 }
 
 class ConsoleCommands():
-    def __init__(self, commands={}):
-        self.commands = commands
+    def __init__(self, commands=None):
+        self.commands = {} if commands is None else commands
 
     def default_func(self, command_name):
         return "Command \'" + command_name + "\' not recognized."
