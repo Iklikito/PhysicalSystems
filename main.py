@@ -60,10 +60,14 @@ def cmd_bg(args):
 @command("show")
 def cmd_show(args):
     global dt, current_system
-    return {
+    variable_name_to_output = {
         "damping" : "Damping coefficient: " + str(float(current_system.damping_coefficient)),
         "stepsize" : "Stepsize: " + str(dt)
-    }[args[0]]
+    }
+
+    if args[0] not in variable_name_to_output:
+        return "Variable name not recognized"
+    return variable_name_to_output[args[0]]
 
 @command("damping")
 def cmd_set_damping(args):
