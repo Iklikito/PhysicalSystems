@@ -18,6 +18,6 @@ g = -9.8
 
 dt = 0.01
 
-simulation_over_real_time_ratio = 4
+simulation_over_real_time_ratio = 10
 
 MAX_FPS = 600

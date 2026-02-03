@@ -81,21 +81,6 @@ def cmd_set_stepsize(args):
     dt = float(args[0])
     return "Step size set to " + str(float(args[0]))
 
-simple_pendulum = SimplePendulum(
-    initial_state=np.array([-1.8, 0]), 
-    rod_length=50, 
-    position=[600,300],
-    damping_coefficient=0.0625
-)
-
-double_pendulum = DoublePendulum(
-    initial_state = np.array([0, 0, 0, 0]),
-    rod_lengths=[100,50],
-    masses=[1,1],
-    position=[600,300],
-    damping_coefficient=0.03125
-)
-
 multipendulum = MultiPendulum(
     initial_state=np.array([-1.5, -1.5, -1.5, -1.5, 0, 0, 0, 0]),
     rod_lengths=[100,50,25,12],
@@ -104,19 +89,11 @@ multipendulum = MultiPendulum(
     damping_coefficient=0.03125*0
 )
 
-multipendulum = MultiPendulum(
-    initial_state=np.array([-1.5, 1.5, -1.5, 1.5, 0, 0, 0, 0]),
-    rod_lengths=[50,50,50,50],
-    masses=[1,1,1,1],
-    position=[600,300],
-    damping_coefficient=0.03125*0
-)
-
 multipendulum_trajectory_tracker = TrajectoryTracker(
-    max_trajectory_lengths=[1]*4,
-    trajectory_colors=[COLORS["gray"]]*4,
+    max_trajectory_lengths=[1]*2,
+    trajectory_colors=[COLORS["gray"]]*2,
     system=multipendulum,
-    trajectory_thicknesses=[1,2,4,8]
+    trajectory_thicknesses=[1,2]
 )
 
 current_system = multipendulum
