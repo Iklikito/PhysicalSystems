@@ -3,7 +3,7 @@ from scipy.optimize import root
 
 class ExplicitEuler():
     def step(self, system, t, dt):
-        state = system.state
+        state = system.get_state()
         f = system.derivative_func
 
         system.set_state(state + dt * f(t, state), t)
@@ -13,7 +13,7 @@ class ExplicitEuler():
 
 class ImplicitEuler():
     def step(self, system, t, dt):
-        state = system.state
+        state = system.get_state()
         f = system.derivative_func
 
         def F(y):
@@ -26,7 +26,7 @@ class ImplicitEuler():
 
 class RK4():
     def step(self, system, t, dt):
-        state = system.state
+        state = system.get_state()
         f = system.derivative_func
         
         k1 = dt*f(t,        state       )

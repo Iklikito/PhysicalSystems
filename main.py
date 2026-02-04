@@ -139,7 +139,8 @@ def cmd_clear(args):
     console.clear_logs()
 
 multipendulum = MultiPendulum(
-    initial_state=np.array([-1.5, -1.5, -1.5, -1.5, 0, 0, 0, 0]),
+    thetas=[-1.5]*4,
+    thetadots=[0]*4,
     rod_lengths=[100,50,25,12],
     masses=[1,1,1,1],
     position=[600,300],

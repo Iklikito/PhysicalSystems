@@ -1,25 +1,27 @@
-from constants import g
 import numpy as np
 import pygame
-from constants import COLORS
+from constants import COLORS, g
 
-class MultiPendulum():
-    def __init__(self, initial_state, rod_lengths, masses, position, damping_coefficient=0.0):
-        self.initial_state = initial_state
-        self.state = initial_state.copy()
+class MultiPendulum:
+    def __init__(self, thetas, thetadots, rod_lengths, masses, position, damping_coefficient=0.0):
+        self.initial_thetas = thetas.copy()
+        self.initial_thetadots = thetadots.copy()
+        self.thetas = thetas.copy()
+        self.thetadots = thetadots.copy()
         self.rod_lengths = rod_lengths
         self.masses = masses
         self.position = position
         self.damping_coefficient = damping_coefficient
-        self.N = len(rod_lengths)
-        self.mass_sums = self.precompute_mass_sums()
+        self.N = len(thetas)
+        self.mass_suffix_sums = self.precompute_mass_suffix_sums()
         self.update_pendulum_positions()
         self.trackers = []
 
     @classmethod
-    def single(cls, initial_state, rod_length, mass, position, damping_coefficient=0.0):
+    def single(cls, theta, thetadot, rod_length, mass, position, damping_coefficient=0.0):
         return cls(
-            initial_state=initial_state,
+            thetas=[theta],
+            thetadots=[thetadot],
             rod_lengths=[rod_length],
             masses=[mass],
             position=position,
@@ -27,61 +29,60 @@ class MultiPendulum():
         )
     
     @classmethod
-    def double(cls, initial_state, rod_length1, rod_length2, mass1, mass2, position, damping_coefficient=0.0):
+    def double(cls, theta1, theta2, thetadot1, thetadot2, rod_length1, rod_length2, mass1, mass2, position, damping_coefficient=0.0):
         return cls(
-            initial_state=initial_state,
+            thetas=[theta1, theta2],
+            thetadots=[thetadot1, thetadot2],
             rod_lengths=[rod_length1, rod_length2],
-            masses=[mass1,mass2],
+            masses=[mass1, mass2],
             position=position,
             damping_coefficient=damping_coefficient
         )
 
-    def precompute_mass_sums(self):
-        mass_sums = []
+    def precompute_mass_suffix_sums(self):
+        mass_suffix_sums = []
         current_sum = 0
 
         for i in range(self.N-1, -1, -1):
             current_sum += self.masses[i]
-            mass_sums.append(current_sum)
+            mass_suffix_sums.append(current_sum)
 
-        mass_sums.reverse()
-        return mass_sums
+        mass_suffix_sums.reverse()
+        return mass_suffix_sums
 
     def derivative_func(self, t, state):
         N = self.N
-        result = np.zeros(2*N)
+        L = self.rod_lengths
+        thetas    = state[:N]
+        thetadots = state[N:]
+        thetaddots = np.zeros(N)
 
-        for i in range(N):
-            result[i] = state[i+N]
-
+        # --- See README for derivation ---
         A = np.zeros((N, N))
         b = np.zeros(N)
 
         for n in range(N):
             for j in range(N):
-                A[n][j] = self.mass_sums[max(j, n)] * self.rod_lengths[j] * self.rod_lengths[n] * np.cos(state[j] - state[n])
-
-        for n in range(N):
-            b[n] = g * self.mass_sums[n] * self.rod_lengths[n] * np.cos(state[n])
-            for j in range(N):
+                mass_sum = self.mass_suffix_sums[max(j, n)]
+                A[n][j] = mass_sum * L[j] * L[n] * np.cos(thetas[j] - thetas[n])
                 if j == n:
-                    continue
-                b[n] += self.mass_sums[max(j, n)] * self.rod_lengths[j] * self.rod_lengths[n] * state[j+N] * state[j+N] * np.sin(state[j] - state[n])
+                    b[n] += g * mass_sum * L[n] * np.cos(thetas[n])
+                b[n] += mass_sum * L[j] * L[n] * thetadots[j] * thetadots[j] * np.sin(thetas[j] - thetas[n])
 
-        undamped_thetadoubledots = np.linalg.solve(A, b)
+        undamped_thetaddots = np.linalg.solve(A, b)
+        # --- See README for derivation ---
 
-        for i in range(N):
-            result[i+N] = undamped_thetadoubledots[i] - self.damping_coefficient * state[i+N]
+        thetaddots = undamped_thetaddots - self.damping_coefficient * thetadots
 
-        return result
+        return np.concatenate([thetadots, thetaddots])
     
     def update_pendulum_positions(self):
         self.pendulum_positions = []
         current_pendulum_position = self.position.copy()
 
         for i in range(self.N):
-            current_pendulum_position[0] += self.rod_lengths[i] * np.cos(self.state[i])
-            current_pendulum_position[1] += self.rod_lengths[i] * np.sin(self.state[i])
+            current_pendulum_position[0] += self.rod_lengths[i] * np.cos(self.thetas[i])
+            current_pendulum_position[1] += self.rod_lengths[i] * np.sin(self.thetas[i])
             self.pendulum_positions.append(current_pendulum_position.copy())
 
     def get_positions(self):
@@ -108,8 +109,15 @@ class MultiPendulum():
         for i in range(self.N):
             pygame.draw.circle(screen, COLORS["white"], self.pendulum_positions[i], 5)
 
+    def get_state(self):
+        return np.concatenate([self.thetas, self.thetadots])
+
+    def get_initial_state(self):
+        return np.concatenate([self.initial_thetas, self.initial_thetadots])
+
     def set_state(self, new_state, t):
-        self.state = new_state
+        self.thetas = new_state[:self.N]
+        self.thetadots = new_state[self.N:]
         self.update_pendulum_positions()
         self.update_trackers(t)
 
@@ -125,6 +133,3 @@ class MultiPendulum():
 
     def set_damping_coefficient(self, damping_coefficient):
         self.damping_coefficient = damping_coefficient
-
-    def get_initial_state(self):
-        return self.initial_state
