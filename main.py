@@ -6,6 +6,7 @@ from constants import WINDOW_WIDTH, WINDOW_HEIGHT, COLORS, CAPTION, dt, simulati
 from dynamic_systems import MultiPendulum
 from solvers import ExplicitEuler, ImplicitEuler, RK4
 from trajectorytracker import TrajectoryTracker
+from energytracker import EnergyTracker
 from console import Console
 from consolecommands import ParameterType
 pygame.init()
@@ -42,6 +43,11 @@ def toggle_console():
 def reset():
     global current_system, t
     current_system.set_state(current_system.get_initial_state(), t)
+
+@key_bind("e")
+def toggle_energy_plot():
+    global show_energy_plot
+    show_energy_plot = not show_energy_plot
 
 console = Console()
 
@@ -138,6 +144,11 @@ def cmd_clear(args):
     global console
     console.clear_logs()
 
+@command(command_name="energy")
+def cmd_energy(args):
+    global show_energy_plot
+    show_energy_plot = not show_energy_plot
+
 multipendulum = MultiPendulum(
     thetas=[-1.5]*4,
     thetadots=[0]*4,
@@ -154,8 +165,18 @@ multipendulum_trajectory_tracker = TrajectoryTracker(
     trajectory_thicknesses=[1,2,4,8]
 )
 
+multipendulum_energy_tracker = EnergyTracker(
+    max_time_span=600,
+    system=multipendulum,
+    curve_thickness=1,
+    plot_position=[100,100],
+    plot_width=WINDOW_WIDTH//3,
+    plot_height=WINDOW_HEIGHT//4
+)
+
 current_system = multipendulum
 current_trajectory_tracker = multipendulum_trajectory_tracker
+current_energy_tracker = multipendulum_energy_tracker
 
 exe_solver = ExplicitEuler()
 ime_solver = ImplicitEuler()
@@ -172,6 +193,7 @@ accumulator = 0
 
 simulating = False
 show_trajectories = False
+show_energy_plot = False
 console_open = False
 running = True
 while running:
@@ -208,6 +230,9 @@ while running:
         current_trajectory_tracker.draw(screen)
 
     current_system.draw(screen)
+
+    if show_energy_plot:
+        current_energy_tracker.draw(screen)
     
     if console_open:
         console.draw(screen)

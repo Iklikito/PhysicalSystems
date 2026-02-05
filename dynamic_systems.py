@@ -133,3 +133,30 @@ class MultiPendulum:
 
     def set_damping_coefficient(self, damping_coefficient):
         self.damping_coefficient = damping_coefficient
+
+    def get_kinetic_energy(self):
+        kinetic_energy = 0
+
+        for j in range(self.N):
+            kinetic_energy += self.mass_suffix_sums[j] * (self.rod_lengths[j] * self.thetadots[j]) ** 2
+
+        kinetic_energy *= 0.5
+
+        for j in range(self.N):
+            for k in range(j+1, self.N):
+                kinetic_energy += self.mass_suffix_sums[k] * self.rod_lengths[j] * self.rod_lengths[k] * self.thetadots[j] * self.thetadots[k] * np.cos(self.thetas[j] - self.thetas[k])
+
+        return kinetic_energy
+
+    def get_potential_energy(self):
+        potential_energy = 0
+
+        for j in range(self.N):
+            potential_energy += self.mass_suffix_sums[j] * self.rod_lengths[j] * np.sin(self.thetas[j])
+
+        potential_energy *= -g
+
+        return potential_energy
+
+    def get_total_energy(self):
+        return self.get_kinetic_energy() + self.get_potential_energy()
